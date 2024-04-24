@@ -1,23 +1,29 @@
 # Запускаем Backed на  express
 
-Открываем IDE и создаем новый проект.
+- Открываем IDE и создаем новый проект.
 В командной строке прописываем:
 ***
-Создание проекта.
+**Создание проекта.**
 ```bash
 yarn init --yes
 ```
-Добавление express и библиотеки для работы с переменными окружения.
+**Добавление express и библиотеки для работы с переменными окружения.**
 ```bash
 yarn add express dotenv
 ```
-Добавление библиотек дебагинга, тайпскрипта, тестов.
+**Добавление библиотек дебагинга, тайпскрипта, тестов.**
 ```bash
 yarn add nodemon typescript ts-node @types/node @types/express jest ts-jest @types/jest supertest @types/supertest --dev
 ```
-Включение тайпскрипта.
+**Включение тайпскрипта.**
 ```bash
 yarn tsc --init
+```
+
+**Установка CORS**  
+Нужна только в случае если мы будем работать с Front.
+```bash
+yarn add @types/cors --dev
 ```
 
 **В файле `tsconfig.json` удаляем содержимое и копируем настройки:**
@@ -93,3 +99,4 @@ app.listen(SETTINGS.PORT, () => {
     console.log('...server started')
 })
 ```
+
