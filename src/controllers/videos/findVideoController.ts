@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {db} from "../db/db";
+import {db} from "../../db/db";
 
 export const findVideoController = (req: Request, res: Response) => {
     let videoID: number = +req.params.id;

@@ -1,4 +1,4 @@
-import {VideosDBType} from "../input-output-types/videos-db-tupe";
+import {VideosDBType} from "../types/videos-db-tupe";
 
 export enum AvailableResolutions {
     P144 = "P144",

@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
-import {ErrorsType} from "../input-output-types/errors-type";
-import {AvailableResolutions, db} from "../db/db";
-import {VideosDBType} from "../input-output-types/videos-db-tupe";
+import {ErrorsType} from "../../types/errors-type";
+import {AvailableResolutions, db} from "../../db/db";
+import {VideosDBType} from "../../types/videos-db-tupe";
 
 export const createVideosController = (req: Request, res: Response) => {
     const errors: ErrorsType = {

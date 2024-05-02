@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {ErrorsType} from "../input-output-types/errors-type";
-import {AvailableResolutions, db} from "../db/db";
+import {ErrorsType} from "../../types/errors-type";
+import {AvailableResolutions, db} from "../../db/db";
 
 export const updateVideoController = (req: Request, res: Response) => {
     const errors: ErrorsType = {

@@ -1,14 +1,16 @@
 import express from 'express'
+import {videosRouter} from "./routers/videos/videos-router";
 import {SETTINGS} from "./settings";
-import {clearDBController} from "./db/clearDBController";
-import {videosRouter} from "./videos/videos-router";
+import {testingRouter} from "./routers/testings/testing-router";
+
 
 export const app = express()
 app.use(express.json()) // добавление ко всем реквестам body и query
 
 app.use(SETTINGS.PATH.VIDEOS, videosRouter)
+app.use(SETTINGS.PATH.TESTING, testingRouter)
 
-app.delete(SETTINGS.PATH.TESTING, clearDBController);
+
 
 
 
