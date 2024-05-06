@@ -14,21 +14,21 @@ export const updateVideoController = (req: Request, res: Response) => {
         return
     }
 
-    const title: string = req.body.title //перед проверкой удаляем пробелы
+    const title: string = req.body.title
     const author: string = req.body.author
     const availableResolutions = req.body.availableResolutions;
     const canBeDownloaded = req.body.canBeDownloaded
     const minAgeRestriction = req.body.minAgeRestriction
     const publicationDate = req.body.publicationDate
 
-    if (!title || title.length > 40 || typeof title !== "string") {
+    if (!title || title.length > 40) {
         errors.errorsMessages.push({
             message: "Incorrect data title",
             field: "title"
         })
     }
 
-    if (!author || author.length > 20 || typeof author !== "string") {
+    if (!author || author.length > 20) {
         errors.errorsMessages.push({
             message: "Incorrect data author",
             field: "author"
@@ -66,7 +66,7 @@ export const updateVideoController = (req: Request, res: Response) => {
     }
 
 
-    //Если длина массива = true то вернем ошибку.
+    //Если длина массива = true вернем ошибку.
     if (errors.errorsMessages.length) {
         res.status(400).json(errors)
         errors.errorsMessages = [];

@@ -2,8 +2,8 @@ import {req} from "./test-helpers";
 import {SETTINGS} from "../settings";
 
 
-//зачистка базы данных для тестов.
 describe('/videos', () => {
+    //зачистка базы данных для тестов.
     beforeAll(async () => {
         await req.delete('/__test__/videos')
     })
@@ -12,40 +12,42 @@ describe('/videos', () => {
         const res = await req
             .get(SETTINGS.PATH.VIDEOS)
             .expect(200, [])
-        console.log('Must return the video:', res.body)
+        //console.log('Must return the video:', res.body)
     })
 
     it('Return 404 if there is no video', async () => {
         const res = await req
             .get(SETTINGS.PATH.VIDEOS + '/1')
             .expect(404)
-        console.log('Return 404 if there is no video', res.body)
+        //console.log('Return 404 if there is no video', res.body)
     })
 
     //проверка createVideosController
-    //проверка на создание не валидной строки.
-    it('Check createVideosController, return 400 if "title", "author","availableResolutions" is invalid', async () => {
-        //проверка на не валидную строку.
+    //проверка на создание невалидной строки.
+    it('Check createVideosController, return 400 if incoming data is invalid', async () => {
+        //1)Отправляем невалидные данные.
         await req
             .post(SETTINGS.PATH.VIDEOS)
-            .send({"title": 1, "author": 2, "availableResolutions": ["P145"]})
+            .send({"title": "", "author": "", "availableResolutions": ["P145"]})
             .expect(400)
-        //проверка тот что массив действительно остался пустым.
+        //2)Проверяем то что объект не создался
         await req
             .get(SETTINGS.PATH.VIDEOS)
             .expect(200, [])
     })
 
-    //проверка на создание валидной строки.
-    it('Check createVideosController, return 201 if "title" valid', async () => {
+    //создали переменную для того чтобы другие тесты смогли к ней обращаться.
+    let createVideo: any = null;
 
+    //проверка на создание валидной строки.
+    it('Check createVideosController, return 201 if incoming data valid', async () => {
         //1) создаем объект
         const createResponse = await req
             .post(SETTINGS.PATH.VIDEOS)
             .send({"title": "video instruction", "author": "some author", "availableResolutions": ["P144"]})
             .expect(201)
 
-        const createVideo = createResponse.body
+        createVideo = createResponse.body
 
         //2)Проверяем то что такие строки создались
         expect(createVideo).toEqual(
@@ -60,14 +62,65 @@ describe('/videos', () => {
             )
         )
 
-            //3)Проверка на создание самого объекта в БД.
-            await req
-                .get(SETTINGS.PATH.VIDEOS)
-                .expect(200, [createVideo])
-        console.log("createVideo: ", createVideo)
+        //3)Проверяем то что объект создался
+        await req
+            .get(SETTINGS.PATH.VIDEOS)
+            .expect(200, [createVideo])
+        //console.log("createVideo: ", createVideo)
+    })
 
+    //проверка updateVideoController
+    //с таким id видео нет
+    it('Check updateVideoController, return 404 not found', async () => {
+        //1)проверяем если такого видео нет вернуть 404
+        await req
+            .put(SETTINGS.PATH.VIDEOS + '/-2')
+            .send({"title": "New title", "author": "New author", "availableResolutions": ["P144"]})
+            .expect(404)
+    })
 
+    // проверка входящих данных невалидной строки.
+    it('Check updateVideoController, return 400 if incoming data is invalid', async () => {
 
+        //проверка на невалидную строку.
+        await req
+            .put(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .send({"title": "", "author": 2, "availableResolutions": ["P145"]})
+            .expect(400)
 
+        //проверка тот что объект не изменился.
+        await req
+            .get(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .expect(200, createVideo)
+    })
+
+    //проверка входящих данных валидной строки.
+    it('Check updateVideoController, return 204 if incoming data valid', async () => {
+
+        //1)Обновляем данные.
+        await req
+            .put(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .send({
+                "title": "New string",
+                "author": "New string",
+                "availableResolutions": ["P1080"],
+                "canBeDownloaded": true,
+                "minAgeRestriction": 18,
+                "publicationDate": "2024-04-23T18:44:31.691Z"
+            })
+            .expect(204)
+
+        //проверка на то что объект изменился
+        const newVideo = await req
+            .get(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .expect(200, {
+                ...createVideo, "title": "New string",
+                "author": "New string",
+                "availableResolutions": ["P1080"],
+                "canBeDownloaded": true,
+                "minAgeRestriction": 18,
+                "publicationDate": "2024-04-23T18:44:31.691Z"
+            })
+        console.log(newVideo.body)
     })
 })
