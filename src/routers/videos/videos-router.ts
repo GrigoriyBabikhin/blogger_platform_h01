@@ -5,7 +5,7 @@ import {findVideoController} from "../../controllers/videos/findVideoController"
 import {updateVideoController} from "../../controllers/videos/updateVideoController";
 import {deleteVideoController} from "../../controllers/videos/deleteVideoController";
 
-export const videosRouter = Router()
+export const videosRouter = Router({})
 
 videosRouter.get('/', getVideoController);
 
