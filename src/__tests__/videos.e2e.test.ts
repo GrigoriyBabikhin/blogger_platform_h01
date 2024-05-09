@@ -37,7 +37,8 @@ describe('/videos', () => {
     })
 
     //создали переменную для того чтобы другие тесты смогли к ней обращаться.
-    let createVideo: any = null;
+    let createVideo1: any = null;
+    let createVideo2: any = null;
 
     //проверка на создание валидной строки.
     it('Check createVideosController, return 201 if incoming data valid', async () => {
@@ -47,10 +48,10 @@ describe('/videos', () => {
             .send({"title": "video instruction", "author": "some author", "availableResolutions": ["P144"]})
             .expect(201)
 
-        createVideo = createResponse.body
+        createVideo1 = createResponse.body
 
         //2)Проверяем то что такие строки создались
-        expect(createVideo).toEqual(
+        expect(createVideo1).toEqual(
             //expect.objectContaining проверяет только те поля
             //которые нам нужно все остальное игнорирует.
             expect.objectContaining(
@@ -65,8 +66,33 @@ describe('/videos', () => {
         //3)Проверяем то что объект создался
         await req
             .get(SETTINGS.PATH.VIDEOS)
-            .expect(200, [createVideo])
-        //console.log("createVideo: ", createVideo)
+            .expect(200, [createVideo1])
+        //console.log("createVideo1: ", createVideo1)
+    })
+
+    //создадим еще одно видео.
+    it('Check createVideosController, createVideo2', async () => {
+        //1) создаем объект
+        const createResponse = await req
+            .post(SETTINGS.PATH.VIDEOS)
+            .send({"title": "video 2", "author": "author 2", "availableResolutions": ["P720"]})
+            .expect(201)
+
+        createVideo2 = createResponse.body
+
+        //2)Проверяем то что такие строки создались
+        expect(createVideo2).toEqual(
+            //expect.objectContaining проверяет только те поля
+            //которые нам нужно все остальное игнорирует.
+            expect.objectContaining(
+                {"title": "video 2", "author": "author 2", "availableResolutions": ["P720"]}
+            )
+        )
+
+        //3)Проверяем то что объект создался
+        await req
+            .get(SETTINGS.PATH.VIDEOS)
+            .expect(200, [createVideo1, createVideo2])
     })
 
     //проверка updateVideoController
@@ -84,14 +110,14 @@ describe('/videos', () => {
 
         //проверка на невалидную строку.
         await req
-            .put(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .put(SETTINGS.PATH.VIDEOS + createVideo1.id)
             .send({"title": "", "author": 2, "availableResolutions": ["P145"]})
             .expect(400)
 
         //проверка тот что объект не изменился.
         await req
-            .get(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
-            .expect(200, createVideo)
+            .get(SETTINGS.PATH.VIDEOS + createVideo1.id)
+            .expect(200, createVideo1)
     })
 
     //проверка входящих данных валидной строки.
@@ -99,7 +125,7 @@ describe('/videos', () => {
 
         //1)Обновляем данные.
         await req
-            .put(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .put(SETTINGS.PATH.VIDEOS + createVideo1.id)
             .send({
                 "title": "New string",
                 "author": "New string",
@@ -112,15 +138,43 @@ describe('/videos', () => {
 
         //проверка на то что объект изменился
         const newVideo = await req
-            .get(SETTINGS.PATH.VIDEOS + '/' + createVideo.id)
+            .get(SETTINGS.PATH.VIDEOS + createVideo1.id)
             .expect(200, {
-                ...createVideo, "title": "New string",
+                ...createVideo1, "title": "New string",
                 "author": "New string",
                 "availableResolutions": ["P1080"],
                 "canBeDownloaded": true,
                 "minAgeRestriction": 18,
                 "publicationDate": "2024-04-23T18:44:31.691Z"
             })
-        console.log(newVideo.body)
+        // console.log(newVideo.body)
+
+        //проверяем что видео 2 случайно не обновилось
+        await req
+            .get(SETTINGS.PATH.VIDEOS + createVideo2.id)
+            .expect(200, createVideo2)
+    })
+
+    //проверка deleteVideoController
+    it('Check deleteVideoController, return 204', async () => {
+
+        //удаляем видео 1 и проверяем что оно пустое
+        await req
+            .delete(SETTINGS.PATH.VIDEOS + createVideo1.id)
+            .expect(204)
+        await req
+            .get(SETTINGS.PATH.VIDEOS + createVideo1.id)
+            .expect(404)
+        //удаляем видео 2 и проверяем что оно пустое
+        await req
+            .delete(SETTINGS.PATH.VIDEOS + createVideo2.id)
+            .expect(204)
+        await req
+            .get(SETTINGS.PATH.VIDEOS + createVideo2.id)
+            .expect(404)
+        //Проверяем что массив пустой
+        await req
+            .get(SETTINGS.PATH.VIDEOS)
+            .expect(200, [])
     })
 })

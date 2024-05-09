@@ -1,7 +1,14 @@
 import {Request, Response} from "express";
-import {ErrorsType} from "../../types/errors-type";
 import {AvailableResolutions, db} from "../../db/db";
 
+export type ErrorsMessagesType = {
+    message: string
+    field: string
+}
+
+export type ErrorsType = {
+    errorsMessages: ErrorsMessagesType[]
+}
 export const updateVideoController = (req: Request, res: Response) => {
     const errors: ErrorsType = {
         errorsMessages: []

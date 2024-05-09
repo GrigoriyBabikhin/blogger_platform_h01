@@ -1,4 +1,14 @@
-import {VideosDBType} from "../types/videos-db-tupe";
+
+export type VideosDBType = {
+    id: number
+    title: string
+    author: string
+    canBeDownloaded: boolean
+    minAgeRestriction: number | null
+    createdAt: string
+    publicationDate: string
+    availableResolutions: AvailableResolutions[]
+}
 
 export enum AvailableResolutions {
     P144 = "P144",
