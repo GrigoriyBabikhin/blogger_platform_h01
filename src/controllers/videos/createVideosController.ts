@@ -1,41 +1,36 @@
 import {Request, Response} from "express";
-import {AvailableResolutions, db, VideosDBType} from "../../db/db";
+import {Resolutions, db} from "../../db/db";
+import {ErrorsType} from "../../types/errors-type";
+import {VideosDBType} from "../../types/videoDB-type";
+import {BodyType} from "../../types/request-response-types";
 
-export type ErrorsMessagesType = {
-    message: string
-    field: string
-}
+export const createVideosController = (
+    req: Request<any, any, BodyType>,
+    res: Response<VideosDBType | ErrorsType>) => {
+    const {title, author, availableResolutions} = req.body
 
-export type ErrorsType = {
-    errorsMessages: ErrorsMessagesType[]
-}
-export const createVideosController = (req: Request, res: Response) => {
     const errors: ErrorsType = {
         errorsMessages: []
     }
 
-    const title = req.body.title
-    const author = req.body.author
-
-    if (!title || title.length > 40 || typeof title !== "string") {
+    if (!title || title.length > 40) {
         errors.errorsMessages.push({
             message: "Incorrect data title",
             field: "title"
         })
     }
 
-    if (!author || author.length > 20 || typeof author !== "string") {
+    if (!author || author.length > 20) {
         errors.errorsMessages.push({
             message: "Incorrect data author",
             field: "author"
         })
     }
 
-    const availableResolutions = req.body.availableResolutions;
     if (!Array.isArray(availableResolutions) ||
-        !availableResolutions.every(r => Object.values(AvailableResolutions).includes(r))) {
+        !availableResolutions.every(r => Object.values(Resolutions).includes(r))) {
         errors.errorsMessages.push({
-            message: "error!!!!",
+            message: "Incorrect available resolutions",
             field: "availableResolutions"
         })
     }
@@ -43,23 +38,22 @@ export const createVideosController = (req: Request, res: Response) => {
     //Если длина массива = true вернем ошибку.
     if (errors.errorsMessages.length) {
         res.status(400).json(errors)
-        errors.errorsMessages = [];
         return;
     }
 
     const createdAt = new Date()
-    const publicationData = new Date()
-    publicationData.setDate(createdAt.getDate() + 1)
+    const publicationDate = new Date()
+    publicationDate.setDate(createdAt.getDate() + 1)
 
     let newVideo: VideosDBType = {
         id: Date.now() + Math.random(),
-        title: title,
-        author: author,
+        title,
+        author,
         canBeDownloaded: false,
         minAgeRestriction: null,
-        createdAt: createdAt.toISOString(),
-        publicationDate: publicationData.toISOString(),
-        availableResolutions: availableResolutions,
+        createdAt,
+        publicationDate,
+        availableResolutions
     }
     db.videos.push(newVideo)
     res.status(201).json(newVideo)

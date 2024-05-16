@@ -1,16 +1,6 @@
+import {DBType} from "../types/videoDB-type";
 
-export type VideosDBType = {
-    id: number
-    title: string
-    author: string
-    canBeDownloaded: boolean
-    minAgeRestriction: number | null
-    createdAt: string
-    publicationDate: string
-    availableResolutions: AvailableResolutions[]
-}
-
-export enum AvailableResolutions {
+export enum Resolutions {
     P144 = "P144",
     P240 = "P240",
     P360 = "P360",
@@ -21,10 +11,6 @@ export enum AvailableResolutions {
     P2160 = "P2160",
 }
 
-export type DBType = {
-    videos: VideosDBType[]
-}
-
 export const db: DBType = {
     videos: [
         {
@@ -33,9 +19,9 @@ export const db: DBType = {
             "author": "string",
             "canBeDownloaded": false,
             "minAgeRestriction": null,
-            "createdAt": "2024-04-07T10:35:45.728Z",
-            "publicationDate": "2024-04-07T10:35:45.728Z",
-            "availableResolutions": [AvailableResolutions.P144]
+            "createdAt": new Date("2024-04-07T10:35:45.728Z"),
+            "publicationDate": new Date("2024-04-07T10:35:45.728Z"),
+            "availableResolutions": [Resolutions.P720]
         }
     ]
 }

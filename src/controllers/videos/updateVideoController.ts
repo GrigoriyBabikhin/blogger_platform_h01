@@ -1,32 +1,26 @@
 import {Request, Response} from "express";
-import {AvailableResolutions, db} from "../../db/db";
+import {Resolutions, db} from "../../db/db";
+import {ErrorsType} from "../../types/errors-type";
+import {BodyType, ParamType} from "../../types/request-response-types";
+import {VideosDBType} from "../../types/videoDB-type";
 
-export type ErrorsMessagesType = {
-    message: string
-    field: string
-}
 
-export type ErrorsType = {
-    errorsMessages: ErrorsMessagesType[]
-}
-export const updateVideoController = (req: Request, res: Response) => {
+export const updateVideoController = (
+    req: Request<ParamType, any, BodyType>,
+    res: Response) => {
+
     const errors: ErrorsType = {
         errorsMessages: []
     }
 
     let videoID: number = +req.params.id;
-    let video = db.videos.find(v => v.id === videoID);
+    let video: VideosDBType | undefined = db.videos.find(v => v.id === videoID);
     if (!video) {
         res.status(404).json()
         return
     }
 
-    const title: string = req.body.title
-    const author: string = req.body.author
-    const availableResolutions = req.body.availableResolutions;
-    const canBeDownloaded = req.body.canBeDownloaded
-    const minAgeRestriction = req.body.minAgeRestriction
-    const publicationDate = req.body.publicationDate
+    const {title, author, availableResolutions, canBeDownloaded, minAgeRestriction, publicationDate} = req.body
 
     if (!title || title.length > 40) {
         errors.errorsMessages.push({
@@ -43,7 +37,7 @@ export const updateVideoController = (req: Request, res: Response) => {
     }
 
     if (!Array.isArray(availableResolutions) ||
-        !availableResolutions.every(r => Object.values(AvailableResolutions).includes(r))) {
+        !availableResolutions.every(r => Object.values(Resolutions).includes(r))) {
         errors.errorsMessages.push({
             message: 'error!!!!',
             field: 'availableResolution'
@@ -65,7 +59,8 @@ export const updateVideoController = (req: Request, res: Response) => {
     }
 
     const dateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
-    if (!dateTimeRegex.test(publicationDate)) {
+    const checkISO = dateTimeRegex.test(publicationDate)
+    if (!checkISO) {
         errors.errorsMessages.push({
             message: 'Incorrect data publicationDate',
             field: 'publicationDate'
@@ -73,21 +68,22 @@ export const updateVideoController = (req: Request, res: Response) => {
     }
 
 
-    //Если длина массива = true вернем ошибку.
+    //Если длина массива = true вернем ошибку
     if (errors.errorsMessages.length) {
         res.status(400).json(errors)
-        errors.errorsMessages = [];
         return
     }
 
     //if перепишет нужные строки у нашего объекта
+    //new Date(publicationDate) т.к это строка, мы преобразуем его к типу дата
     if (video) {
-        video.title = req.body.title
-        video.author = req.body.author
-        video.availableResolutions = req.body.availableResolutions
-        video.canBeDownloaded = req.body.canBeDownloaded
-        video.minAgeRestriction = req.body.minAgeRestriction
-        video.publicationDate = req.body.publicationDate
+        video.title = title
+        video.author = author
+        video.availableResolutions = availableResolutions
+        video.canBeDownloaded = canBeDownloaded
+        video.minAgeRestriction = minAgeRestriction
+        video.publicationDate = new Date(publicationDate)
     }
     res.status(204).json(video)
 }
+
