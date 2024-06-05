@@ -43,7 +43,7 @@ export const createVideosController = (
 
     const createdAt = new Date()
     const publicationDate = new Date()
-    publicationDate.setDate(createdAt.getDate() + 1)
+    publicationDate.setDate(createdAt.getDate() + 1)//+ 1 день
 
     let newVideo: VideosDBType = {
         id: Date.now() + Math.random(),
